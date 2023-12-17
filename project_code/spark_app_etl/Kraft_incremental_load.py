@@ -8,12 +8,12 @@ def fetch_data_S3(spark, S3_path):
         .option('multiline', 'true') \
         .load(S3_path)
     # tranform data
-    data = raw_data.selectExpr('itemid', 'name', 'stock', "historical_sold",
+    data = raw_data.selectExpr('itemid', "shopid", 'name', 'stock', "historical_sold",
                                'price/100000 as current_price', "price_min/100000 as current_price_min", "price_max/100000 as current_price_max",
                                "case when price_before_discount != 0 then price_before_discount/100000 else price/100000 end as price_before_discount",
                                "case when price_min_before_discount = -1 then price_min/100000 else price_min_before_discount/100000 end as price_min_before_discount",
                                "case when price_max_before_discount = -1 then price_max/100000 else price_max_before_discount/100000 end as price_max_before_discount",
-                               "cast(1-raw_discount/100 as decimal(5,2)) as discount",
+                               "cast(1-raw_discount/100 as decimal(5,2)) as discount", "cast(from_unixtime(ctime, 'yyyy-MM-dd') as date) as create_time",
                                'item_rating.rating_star as rating_star', 'item_rating.rating_count[0] as total_vote', 'item_rating.rating_count[5] as five_stars',
                                'item_rating.rating_count[4] as four_stars', 'item_rating.rating_count[3] as three_stars', 'item_rating.rating_count[2] as two_stars',
                                'item_rating.rating_count[1] as one_star', "liked_count", "cmt_count", "concat('https://down-vn.img.susercontent.com/file/', image) as images_url",
@@ -40,8 +40,8 @@ def load_data_to_MongoDB(tranformed_data, mode, database, collection):
 
 def update_new_data(new_data, old_data):
     # condiiton to join 2 data frames
-    join_condition = ['itemid', 'name', 'stock', "historical_sold", 'current_price', 'current_price_min', 'current_price_max',
-                      'price_before_discount', 'price_min_before_discount', 'price_max_before_discount', 'discount', 'rating_star','total_vote',
+    join_condition = ['itemid', "shopid", 'name', 'stock', "historical_sold", 'current_price', 'current_price_min', 'current_price_max',
+                      'price_before_discount', 'price_min_before_discount', 'price_max_before_discount', 'discount', 'create_time', 'rating_star','total_vote',
                       'five_stars', 'four_stars', 'three_stars', 'two_stars', 'one_star', 'liked_count', 'cmt_count', 'images_url'
                       ]
 
@@ -50,8 +50,8 @@ def update_new_data(new_data, old_data):
 
     if new_data.count() != 0:
 
-        update_data = outer_join_data.selectExpr('itemid', 'name', 'stock', "historical_sold", 'current_price', 'current_price_min', 'current_price_max',
-                    'price_before_discount', 'price_min_before_discount', 'price_max_before_discount', 'discount', 'rating_star', 'total_vote',
+        update_data = outer_join_data.selectExpr('itemid', "shopid", 'name', 'stock', "historical_sold", 'current_price', 'current_price_min', 'current_price_max',
+                    'price_before_discount', 'price_min_before_discount', 'price_max_before_discount', 'discount', 'create_time', 'rating_star', 'total_vote',
                     'five_stars', 'four_stars', 'three_stars', 'two_stars', 'one_star', 'liked_count', 'cmt_count', 'images_url',
                     '_id', "case when n_current_flag is null then 'Expired' else 'Current' end as current_flag",
                     "case when n_start_date is null then start_date else n_start_date end as start_date",

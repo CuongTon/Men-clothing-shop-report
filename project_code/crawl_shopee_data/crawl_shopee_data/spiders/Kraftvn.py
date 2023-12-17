@@ -6,12 +6,19 @@ import time
 import json
 
 class KraftvnSpider(scrapy.Spider):
+    
+    #general information
     name = "Kraftvn"
+    shop_id = 623651329
+    google_search_shop_link_first_page = 'https://shopee.vn/kraftvn#product_list'
+
+    # distract scrapy
     allowed_domains = ["github.com"]
     start_urls = ["https://github.com"]
 
+    # S3 file configuration
     # custom_settings = {
-    #     'FEEDS':{'s3://shopeeproject/Kraftvn/data.json': {
+    #     'FEEDS':{f's3://shopeeproject/Kraftvn/{name}.json': {
     #         'format': 'json',
     #         'encoding': 'utf8',
     #         'store_empty': False,
@@ -33,16 +40,12 @@ class KraftvnSpider(scrapy.Spider):
         self.driver.get('https://www.google.com')
 
         search_input = self.driver.find_element(By.XPATH, '//textarea[@type="search"]')
-        search_input.send_keys("https://shopee.vn/kraftvn#product_list")
+        search_input.send_keys(self.google_search_shop_link_first_page)
         search_input.send_keys(Keys.ENTER)
 
-        first_item = self.driver.find_element(By.XPATH, '(//h3[@class="LC20lb MBeuO DKV0Md"])[1]')
-        first_item.click()
+        first_page = self.driver.find_element(By.XPATH, '(//h3[@class="LC20lb MBeuO DKV0Md"])[1]')
+        first_page.click()
 
-        time.sleep(5)
-
-        full_product = self.driver.find_element(By.XPATH, '(//button[@class="shopee-button-no-outline"])[1]')
-        full_product.click()
         time.sleep(5)
 
     def _get_response_XHR(self, api_url):
@@ -75,7 +78,7 @@ class KraftvnSpider(scrapy.Spider):
         while items_crawled < total_items:
             # crawl api response
             print(f'{"-"*10} Page: {page_number} {"-"*10}')
-            url = f'https://shopee.vn/api/v4/shop/rcmd_items?bundle=shop_page_rfy&limit=48&offset={off_set}&shop_id=623651329&upstream='
+            url = f'https://shopee.vn/api/v4/shop/rcmd_items?bundle=shop_page_category_tab_main&limit=30&offset={off_set}&shop_id={self.shop_id}&sort_type=1&upstream='
             
             # handle repsonse
             xhr_body = self._get_response_XHR(url)
@@ -83,7 +86,7 @@ class KraftvnSpider(scrapy.Spider):
             items_list = xhr_body['data']['items']
 
             # move to next page, why 48, each page have maximum 48 items
-            off_set += 48
+            off_set += 30
             items_crawled += len(items_list)
             page_number += 1
 

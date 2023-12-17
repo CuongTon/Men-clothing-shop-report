@@ -69,7 +69,6 @@ with DAG(
             python3 /home/cuongton/airflow/project_code/data_mart_etl/daily_sale_star_schema.py
         ''',
         trigger_rule = "none_failed"
-
     )
 
     start >> Kraft_data_from_shopee >> is_the_first_time >> [initial_load, incremental_load] >> daily_sale_data_mart >> end

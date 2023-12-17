@@ -6,14 +6,14 @@ def fetch_data_S3(spark, S3_path):
     raw_data = spark.read \
         .format('json') \
         .option('multiline', 'true') \
-        .load(S3_path)
+        .load(S3_Path) #change
     # tranform data
-    data = raw_data.selectExpr('itemid', 'name', 'stock', "historical_sold",
+    data = raw_data.selectExpr('itemid', "shopid", 'name', 'stock', "historical_sold",
                                'price/100000 as current_price', "price_min/100000 as current_price_min", "price_max/100000 as current_price_max",
                                "case when price_before_discount != 0 then price_before_discount/100000 else price/100000 end as price_before_discount",
                                "case when price_min_before_discount = -1 then price_min/100000 else price_min_before_discount/100000 end as price_min_before_discount",
                                "case when price_max_before_discount = -1 then price_max/100000 else price_max_before_discount/100000 end as price_max_before_discount",
-                               "cast(1-raw_discount/100 as decimal(5,2)) as discount",
+                               "cast(1-raw_discount/100 as decimal(5,2)) as discount", "cast(from_unixtime(ctime, 'yyyy-MM-dd') as date) as create_time",
                                'item_rating.rating_star as rating_star', 'item_rating.rating_count[0] as total_vote', 'item_rating.rating_count[5] as five_stars',
                                'item_rating.rating_count[4] as four_stars', 'item_rating.rating_count[3] as three_stars', 'item_rating.rating_count[2] as two_stars',
                                'item_rating.rating_count[1] as one_star', "liked_count", "cmt_count", "concat('https://down-vn.img.susercontent.com/file/', image) as images_url",
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     spark.sparkContext._jsc.hadoopConfiguration().set("fs.s3a.secret.key", secret.Secret_Key)
 
     # read data from S3
-    S3_Path = 's3a://shopeeproject/Kraftvn/data.json'
+    S3_Path = 's3a://shopeeproject/Kraftvn/myfinal_data.json'
     KraftVN = fetch_data_S3(spark, S3_Path)
 
     # load data to MongoDB

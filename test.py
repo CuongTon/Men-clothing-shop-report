@@ -10,9 +10,14 @@
 #     print('initial_load')
 
 
-import subprocess 
+# import subprocess 
 
 # subprocess.run(["airflow", "webserver", "--daemon"], check=True)
 # subprocess.run(["airflow", "scheduler", "--daemon"], check=True)
-subprocess.run(["airflow", "celery", "worker",  "--daemon"], check=True)
+# subprocess.run(["airflow", "celery", "worker",  "--daemon"], check=True)
 # subprocess.run(["airflow", "celery", "flower",  "--daemon"], check=True)
+
+from datetime import datetime
+
+time = 1626165776
+print(datetime.fromtimestamp(time))
