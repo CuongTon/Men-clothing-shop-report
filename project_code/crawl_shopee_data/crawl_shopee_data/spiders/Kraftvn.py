@@ -1,0 +1,100 @@
+import scrapy
+import undetected_chromedriver as webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import time
+import json
+
+class KraftvnSpider(scrapy.Spider):
+    name = "Kraftvn"
+    allowed_domains = ["github.com"]
+    start_urls = ["https://github.com"]
+
+    # custom_settings = {
+    #     'FEEDS':{'s3://shopeeproject/Kraftvn/data.json': {
+    #         'format': 'json',
+    #         'encoding': 'utf8',
+    #         'store_empty': False,
+    #         'indent': 4}                
+    #     }
+    # }
+
+    def __init__(self):
+
+        # set up selenium
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("--user-data-dir=crawl_shopee_data/kraft_profile_v2")
+        chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
+        self.driver = webdriver.Chrome(options=chrome_options)
+        # Enable network tracking
+        self.driver.execute_cdp_cmd("Network.enable", {})
+
+        # navigate to a destinated website
+        self.driver.get('https://www.google.com')
+
+        search_input = self.driver.find_element(By.XPATH, '//textarea[@type="search"]')
+        search_input.send_keys("https://shopee.vn/kraftvn#product_list")
+        search_input.send_keys(Keys.ENTER)
+
+        first_item = self.driver.find_element(By.XPATH, '(//h3[@class="LC20lb MBeuO DKV0Md"])[1]')
+        first_item.click()
+
+        time.sleep(5)
+
+        full_product = self.driver.find_element(By.XPATH, '(//button[@class="shopee-button-no-outline"])[1]')
+        full_product.click()
+        time.sleep(5)
+
+    def _get_response_XHR(self, api_url):
+
+        time.sleep(5)
+        # get logs from chrome developer tools. And go to message part to find requestId
+        logs_raw = self.driver.get_log("performance")
+        logs = [json.loads(lr["message"])["message"] for lr in logs_raw]
+        # get response body according to api_url
+        for log in logs:
+            try:
+                request_url = log["params"]["response"]["url"]
+                request_id = log["params"]["requestId"]
+                if request_url == api_url:
+                    xhr_response = self.driver.execute_cdp_cmd("Network.getResponseBody", {"requestId": request_id})
+                    body = json.loads(xhr_response['body'])
+            except:
+                continue
+
+        return body
+
+    def parse(self, response):
+        # set up variables, to move next page and control while loop
+        off_set = 0
+        items_crawled = 0
+        total_items = 1
+        page_number = 1
+
+        # get api response in multiple pages
+        while items_crawled < total_items:
+            # crawl api response
+            print(f'{"-"*10} Page: {page_number} {"-"*10}')
+            url = f'https://shopee.vn/api/v4/shop/rcmd_items?bundle=shop_page_rfy&limit=48&offset={off_set}&shop_id=623651329&upstream='
+            
+            # handle repsonse
+            xhr_body = self._get_response_XHR(url)
+            total_items = xhr_body['data']['total']
+            items_list = xhr_body['data']['items']
+
+            # move to next page, why 48, each page have maximum 48 items
+            off_set += 48
+            items_crawled += len(items_list)
+            page_number += 1
+
+            # save output
+            for item in items_list:
+                yield item
+
+            # move to the next page
+            next_page = self.driver.find_element(By.XPATH, '//button[@class="shopee-icon-button shopee-icon-button--right "]')
+            next_page.click()
+
+        # close driver
+        time.sleep(2)
+        self.driver.close()

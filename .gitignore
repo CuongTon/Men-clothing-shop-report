@@ -573,3 +573,7 @@ Thumbs.db
 
 # OSX miscellaneous
 .DS_Store
+
+secret.py
+kraft_profile*
+test.py
