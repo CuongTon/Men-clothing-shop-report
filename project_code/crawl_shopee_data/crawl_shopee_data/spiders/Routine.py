@@ -30,7 +30,8 @@ class KraftvnSpider(scrapy.Spider):
 
         # set up selenium
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--user-data-dir=crawl_shopee_data/kraft_profile_v2")
+        chrome_options.add_argument(f"--user-data-dir=crawl_shopee_data/ChromeProfile/First_Profile")
+        chrome_options.add_argument("--profile-directory=shopee_profile")
         chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
         self.driver = webdriver.Chrome(options=chrome_options)
         # Enable network tracking
@@ -92,6 +93,7 @@ class KraftvnSpider(scrapy.Spider):
 
             # save output
             for item in items_list:
+                item['shop_name'] = self.name
                 yield item
 
             # move to the next page

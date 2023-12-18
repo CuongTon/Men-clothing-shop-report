@@ -578,3 +578,7 @@ secret.py
 kraft_profile*
 test.py
 Raw_Data/
+chrome_profile
+ChromeProfile
+RawData
+selenium_multiple_profile

@@ -17,7 +17,7 @@ logging.basicConfig(
 def get_product():
 
     bulk = []
-    documents = kraftvn_collection.find()
+    documents = men_shop_collection.find()
 
     for doc in documents:
         item = {
@@ -27,6 +27,7 @@ def get_product():
             "historical_sold": doc["historical_sold"],
             "price_before_discount": doc["price_before_discount"],
             "images_url": doc["images_url"],
+            "create_time": doc["create_time"]
         }
         bulk.append(ReplaceOne(item, item, upsert=True))
 
@@ -43,7 +44,7 @@ def get_product():
 # Function to create rating_dim collection
 def get_rating():
     bulk = []
-    documents = kraftvn_collection.find()
+    documents = men_shop_collection.find()
 
     for doc in documents:
         item = {
@@ -72,7 +73,7 @@ def get_rating():
 # Function to create discount_dim collection
 def get_discount():
     bulk = []
-    documents = kraftvn_collection.find()
+    documents = men_shop_collection.find()
 
     for doc in documents:
         item = {
@@ -89,6 +90,28 @@ def get_discount():
         return True
     else:
         logging.warning("No new item insert into discount_dim")
+
+# Function to create shop_dim collection
+def get_shop():
+    bulk = []
+    documents = men_shop_collection.find()
+
+    for doc in documents:
+        item = {
+            "shopid": doc["shopid"],
+            "shop_name": doc["shop_name"]
+        }
+        bulk.append(ReplaceOne(item, item, upsert=True))
+    
+    before_counter = db["shop_dim"].count_documents({})
+
+    if len((bulk)):
+        db["shop_dim"].bulk_write(bulk)
+        counter = db["shop_dim"].count_documents({}) - before_counter
+        logging.info(f'Inserted {counter} items into shop_dim')
+        return True
+    else:
+        logging.warning("No new item insert into shop_dim")
 
 
 # Function to create time_dim collection
@@ -127,7 +150,7 @@ def get_time():
 # Function to create daily_sale_fact collection
 def get_daily_revenue():
     bulk = []
-    documents = kraftvn_collection.find()
+    documents = men_shop_collection.find()
     
     for doc in documents:
         # find new document which is inserted today and the status is current
@@ -136,7 +159,7 @@ def get_daily_revenue():
             quantity_sold = 0
             current_price = 0
             # find the expried items, have expiration date is today
-            expired_item = kraftvn_collection.find_one({'itemid': doc['itemid'], 'current_flag': 'Expired', 
+            expired_item = men_shop_collection.find_one({'itemid': doc['itemid'], 'current_flag': 'Expired', 
                                                     'expiration_date': doc['start_date']})
             
             if expired_item is None: 
@@ -224,13 +247,14 @@ if __name__ == '__main__':
     client = MongoClient("mongodb://192.168.1.20:27017")
 
     # Access the MongoDB database and collection
-    db = client["ShopeeVN_airflow"] #changelater
-    kraftvn_collection = db["KraftVN_airflow"] #changelater
+    db = client["ShopeeVN_airflow"]
+    men_shop_collection = db["MenClothingShop_airflow"]
     first_day = time_setting.start_time # it will delay one 1 day when read data from MongoDB. Spark read an exact day, but pymongo read 1 day delay
 
     # insert new items
     get_product()
     get_rating()
     get_discount()
+    get_shop()
     get_time()
     get_daily_revenue()

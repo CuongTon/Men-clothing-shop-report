@@ -5,6 +5,7 @@ from airflow.operators.empty import EmptyOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from datetime import datetime
 from pymongo import MongoClient 
+from group_dags.subdag_download import download_task
 import sys
 sys.path.append('/home/cuongton/airflow/')
 from project_setting import time_setting
@@ -12,7 +13,7 @@ from project_setting import time_setting
 def _is_the_first_time():
     server = MongoClient("mongodb://192.168.1.20:27017")
     db = server['ShopeeVN_airflow']
-    collection = db['KraftVN_airflow']
+    collection = db['MenClothingShop_airflow']
     if collection.find_one():
         return 'incremental_load'
     else:
@@ -20,7 +21,7 @@ def _is_the_first_time():
 
 with DAG(
     "daily_sale_dashboard",
-    schedule_interval='@daily',
+    schedule_interval='0 9 * * *',
     catchup=False,
     start_date=time_setting.start_time
 ) as dag:
@@ -34,13 +35,15 @@ with DAG(
         trigger_rule='none_failed'
     )
 
-    Kraft_data_from_shopee = BashOperator(
-        task_id = 'Kraft_data_from_shopee',
-        bash_command='''
+    download_raw_data = download_task()
+
+    merge_and_put_S3 = BashOperator(
+        task_id = "merge_and_put_S3",
+        bash_command="""
             source ~/airflow/bin/activate
-            cd /home/cuongton/airflow/project_code/crawl_shopee_data
-            scrapy crawl Kraftvn
-        '''
+            cd /home/cuongton/airflow/project_code/spark_app_etl
+            python3 Merge_and_Put_S3.py
+        """
     )
 
     is_the_first_time = BranchPythonOperator(
@@ -51,14 +54,14 @@ with DAG(
     initial_load = SparkSubmitOperator(
         task_id = 'initial_load',
         conn_id='local_spark',
-        application='/home/cuongton/airflow/project_code/spark_app_etl/Kraft_initial_load.py',
+        application='/home/cuongton/airflow/project_code/spark_app_etl/Initial_load.py',
         packages='org.apache.hadoop:hadoop-aws:3.3.1,org.apache.hadoop:hadoop-common:3.3.1,org.mongodb.spark:mongo-spark-connector_2.12:3.0.2'
     )
 
     incremental_load = SparkSubmitOperator(
         task_id = 'incremental_load',
         conn_id='local_spark',
-        application='/home/cuongton/airflow/project_code/spark_app_etl/Kraft_incremental_load.py',
+        application='/home/cuongton/airflow/project_code/spark_app_etl/Incremental_load.py',
         packages='org.apache.hadoop:hadoop-aws:3.3.1,org.apache.hadoop:hadoop-common:3.3.1,org.mongodb.spark:mongo-spark-connector_2.12:3.0.2'
     )
 
@@ -71,6 +74,6 @@ with DAG(
         trigger_rule = "none_failed"
     )
 
-    start >> Kraft_data_from_shopee >> is_the_first_time >> [initial_load, incremental_load] >> daily_sale_data_mart >> end
+    start >> download_raw_data >> merge_and_put_S3 >> is_the_first_time >> [initial_load, incremental_load] >> daily_sale_data_mart >> end
     
 
