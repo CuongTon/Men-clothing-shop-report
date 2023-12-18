@@ -16,7 +16,7 @@ def fetch_data_S3(spark, S3_path):
                                "cast(1-raw_discount/100 as decimal(5,2)) as discount", "cast(from_unixtime(ctime, 'yyyy-MM-dd') as date) as create_time",
                                'item_rating.rating_star as rating_star', 'item_rating.rating_count[0] as total_vote', 'item_rating.rating_count[5] as five_stars',
                                'item_rating.rating_count[4] as four_stars', 'item_rating.rating_count[3] as three_stars', 'item_rating.rating_count[2] as two_stars',
-                               'item_rating.rating_count[1] as one_star', "liked_count", "cmt_count", "concat('https://down-vn.img.susercontent.com/file/', image) as images_url",
+                               'item_rating.rating_count[1] as one_star', "liked_count", "cmt_count", "shop_rating", "concat('https://down-vn.img.susercontent.com/file/', image) as images_url",
                                "'Current' as current_flag", "current_date() as start_date", "date('2999-12-31') as expiration_date"
                                )
     return data

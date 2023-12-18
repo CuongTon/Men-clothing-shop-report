@@ -99,7 +99,8 @@ def get_shop():
     for doc in documents:
         item = {
             "shopid": doc["shopid"],
-            "shop_name": doc["shop_name"]
+            "shop_name": doc["shop_name"],
+            "shop_rating": doc["shop_rating"]
         }
         bulk.append(ReplaceOne(item, item, upsert=True))
     

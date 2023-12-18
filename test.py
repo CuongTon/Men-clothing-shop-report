@@ -34,19 +34,19 @@
 # print(mystring)
 
 
-import scrapy
-import undetected_chromedriver as webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-import time
-import json
+# import scrapy
+# import undetected_chromedriver as webdriver
+# from selenium.webdriver.common.by import By
+# from selenium.webdriver.common.keys import Keys
+# import time
+# import json
 
 
     
 #general information
-name = "4MEN"
-shop_id = 277366270
-google_search_shop_link_first_page = 'https://shopee.vn/4menstores#product_list'
+# name = "4MEN"
+# shop_id = 277366270
+# google_search_shop_link_first_page = 'https://shopee.vn/4menstores#product_list'
 
 # distract scrapy
 # S3 file configuration
@@ -61,19 +61,26 @@ google_search_shop_link_first_page = 'https://shopee.vn/4menstores#product_list'
 
 
 # set up selenium
-chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument("--user-data-dir=project_code/crawl_shopee_data/crawl_shopee_data/kraft_profile_v2")
-driver = webdriver.Chrome(options=chrome_options)
-# Enable network tracking
+# chrome_options = webdriver.ChromeOptions()
+# chrome_options.add_argument("--user-data-dir=project_code/crawl_shopee_data/crawl_shopee_data/kraft_profile_v2")
+# driver = webdriver.Chrome(options=chrome_options)
+# # Enable network tracking
 
-# navigate to a destinated website
-driver.get('https://www.google.com')
+# # navigate to a destinated website
+# driver.get('https://www.google.com')
 
-search_input = driver.find_element(By.XPATH, '//textarea[@type="search"]')
-search_input.send_keys(google_search_shop_link_first_page)
-search_input.send_keys(Keys.ENTER)
+# search_input = driver.find_element(By.XPATH, '//textarea[@type="search"]')
+# search_input.send_keys(google_search_shop_link_first_page)
+# search_input.send_keys(Keys.ENTER)
 
-first_page = driver.find_element(By.XPATH, '(//h3[@class="LC20lb MBeuO DKV0Md"])[1]')
-first_page.click()
+# first_page = driver.find_element(By.XPATH, '(//h3[@class="LC20lb MBeuO DKV0Md"])[1]')
+# first_page.click()
 
-time.sleep(5)
+# time.sleep(5)
+
+
+from datetime import datetime
+
+current_date = datetime.today()
+
+print(current_date.day, current_date.month, current_date.year)
