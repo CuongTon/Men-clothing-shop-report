@@ -79,8 +79,43 @@
 # time.sleep(5)
 
 
-from datetime import datetime
+from datetime import datetime, date
 
-current_date = datetime.today()
+# current_date = datetime.today()
 
-print(current_date.day, current_date.month, current_date.year)
+# print(current_date.day, current_date.month, current_date.year, current_date.date(), date.today())
+
+
+dct = [{'item_id': 1, 'issue_date': datetime(2023,12,19)}, {'item_id': 3, 'issue_date': datetime(2023,12,17)}, {'item_id': 2, 'issue_date': datetime(2023,12,10)}]
+
+new_dct = sorted(dct, key=lambda x: x['issue_date'],reverse=True)[0]
+
+print(new_dct)
+
+mylist = []
+
+print(mylist is None)
+
+
+# function delete_dim_table(databaseName) {
+#     const delete_dim_list = ["discount_dim", "product_detail_dim", "rating_dim", "shop_dim", "time_dim", "daily_sale_fact"];
+
+
+#     const db = db.getSiblingDB(databaseName);
+
+#     delete_dim_list.forEach(function (collection) {
+#         if (db.getCollectionNames().indexOf(collection) >= 0) {
+#             db.getCollection(collection).drop();
+#             print("Deleted Collection: " + collection);
+#         }
+#     });
+# }
+
+# delete_dim_list.forEach( function (collection) { if (db.getCollectionNames().indexOf(collection)>=0) { db.getCollection(collection).drop(); print("Deleted Collection: "+ collection); } })
+
+
+S3_Bucket = 'shopeeproject'
+S3_Key = 'ShopeeShop/MenClothingShop.json'
+S3_path = f's3a://{S3_Bucket}/{S3_Key}'
+
+print(S3_path)

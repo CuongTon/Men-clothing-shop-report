@@ -1,5 +1,9 @@
 from pyspark.sql import SparkSession
 import secret
+import sys
+sys.path.append('/home/cuongton/airflow/')
+from project_setting import generall_setting
+from datetime import date, timedelta
 
 def fetch_data_S3(spark, S3_path):
     # read data from S3
@@ -17,7 +21,7 @@ def fetch_data_S3(spark, S3_path):
                                'item_rating.rating_star as rating_star', 'item_rating.rating_count[0] as total_vote', 'item_rating.rating_count[5] as five_stars',
                                'item_rating.rating_count[4] as four_stars', 'item_rating.rating_count[3] as three_stars', 'item_rating.rating_count[2] as two_stars',
                                'item_rating.rating_count[1] as one_star', "liked_count", "cmt_count","shop_rating", "concat('https://down-vn.img.susercontent.com/file/', image) as images_url",
-                               "'Current' as n_current_flag", "current_date() as n_start_date", "date('2999-12-31') as n_expiration_date"
+                               "'Current' as n_current_flag", f"date('{current_date}') as n_start_date", "date('2999-12-31') as n_expiration_date"
                                )
     return data
 
@@ -55,7 +59,7 @@ def update_new_data(new_data, old_data):
                     'five_stars', 'four_stars', 'three_stars', 'two_stars', 'one_star', 'liked_count', 'cmt_count', "shop_rating", 'images_url',
                     '_id', "case when n_current_flag is null then 'Expired' else 'Current' end as current_flag",
                     "case when n_start_date is null then start_date else n_start_date end as start_date",
-                    "case when n_expiration_date is null then current_date() else n_expiration_date end as expiration_date"
+                    f"case when n_expiration_date is null then date('{current_date}') else n_expiration_date end as expiration_date"
                     )
         return update_data
     else:
@@ -78,13 +82,16 @@ if __name__ == '__main__':
     # set up log
     logger = spark.sparkContext._jvm.org.apache.log4j.LogManager.getLogger(__name__)
 
+    # set current date. Default timedelta is 0
+    current_date = date.today() - timedelta(days=generall_setting.delay_time_for_rerun_S3)
+
     # read latest data from S3
-    S3_Path = 's3a://shopeeproject/ShopeeShop/MenClothingShop.json'
+    S3_Path = generall_setting.S3_path
     latest_KraftVN = fetch_data_S3(spark, S3_Path)
 
     # read current data from MongoDB
-    database = 'ShopeeVN_airflow' #changelater
-    collection = 'MenClothingShop_airflow' #changelater
+    database = generall_setting.Mongo_Database 
+    collection = generall_setting.Mongo_Collection 
     current_Shop = retrieve_data_from_MongoDB(spark, database,collection)
 
     # find a new change data

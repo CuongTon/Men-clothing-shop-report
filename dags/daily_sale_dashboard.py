@@ -8,12 +8,12 @@ from pymongo import MongoClient
 from group_dags.subdag_download import download_task
 import sys
 sys.path.append('/home/cuongton/airflow/')
-from project_setting import time_setting
+from project_setting import time_setting, generall_setting
 
 def _is_the_first_time():
     server = MongoClient("mongodb://192.168.1.20:27017")
-    db = server['ShopeeVN_airflow']
-    collection = db['MenClothingShop_airflow']
+    db = server[generall_setting.Mongo_Database]
+    collection = db[generall_setting.Mongo_Collection]
     if collection.find_one():
         return 'incremental_load'
     else:

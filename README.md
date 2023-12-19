@@ -10,8 +10,8 @@
 1. ~~Adjust Spark ETL: change variable name *done*> test *done*> design which step will have shop_name *done by adding name in scratching part*~~
 2. ~~Adjust combine_data: be more professional *done*~~
 3. ~~Change data_mart: add more field *done*~~
-4. ~~Change airflow: add task, how to make task run every 9 hours *Done*. How to make task run mutiple selenium concurrency. Continue with multiple profile
-5. Adjust PowerBI and ODBC connection
-6. What should I do when one item is deleted
+4. ~~Change airflow: add task, how to make task run every 9 hours *Done*~~. ~~How to make task run mutiple selenium concurrency. Continue with multiple profile~~ *done with 2 chrome run parallelly*
+5. Adjust PowerBI and ~~ODBC connection *done*~~
+6. ~~What should I do when one item is deleted~~ *done mark it as an expried item. When it is added again, calculate the amount different from the lastest expired time*
 7. Check the time on Power BI why the date is 2 two days later from now.
 8. ~~How to run airflow server with one click *done*~~

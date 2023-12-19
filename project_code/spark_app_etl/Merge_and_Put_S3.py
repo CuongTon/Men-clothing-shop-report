@@ -3,13 +3,13 @@ import boto3
 import secret
 import sys
 sys.path.append('/home/cuongton/airflow/')
-from project_setting import shop_setting
-from datetime import datetime
+from project_setting import shop_setting, generall_setting
+from datetime import datetime, timedelta
 
 
 def combine_json_file(list_of_json_file):
 
-    current_date = datetime.today()
+    current_date = datetime.today() - timedelta(days=generall_setting.delay_time_for_rerun_S3)
 
     merged_data = []
     for file in list_of_json_file:
@@ -25,8 +25,8 @@ if __name__ == '__main__':
     s3 = boto3.client('s3', aws_access_key_id=secret.Access_Key, aws_secret_access_key=secret.Secret_Key)
     s3.put_object(
         Body=json.dumps(final_data),
-        Bucket='shopeeproject',
-        Key='ShopeeShop/MenClothingShop.json'
+        Bucket=generall_setting.S3_Bucket,
+        Key=generall_setting.S3_Key
     )
 
 # ['4MEN.json', 'Biluxury.json', 'Coolmate.json', 'Highway.json', 'Justmen.json', 'Kraftvn.json', 'Levents.json', 'Routine.json', 'SSSTUTTER.json', 'YaMe.json']

@@ -4,7 +4,7 @@ import math
 import logging
 import sys
 sys.path.append('/home/cuongton/airflow/')
-from project_setting import time_setting
+from project_setting import time_setting, generall_setting
 
 # set up logging
 logging.basicConfig(
@@ -161,16 +161,30 @@ def get_daily_revenue():
             current_price = 0
             # find the expried items, have expiration date is today
             expired_item = men_shop_collection.find_one({'itemid': doc['itemid'], 'current_flag': 'Expired', 
-                                                    'expiration_date': doc['start_date']})
-            
+                                                    'expiration_date': doc['start_date']}) # this will return None or a dictionary
             if expired_item is None: 
-                # there is two cases when an expired item is None, so we just have new item and don't expired item. First ETL or they launch a new product.
-                if doc['start_date'].date() == first_day.date(): # first ETL
+                # there is three cases when an expired item of pervious date is None:
+                # First case: first time run ETL, so all the items are new items and ignore historical_sold
+                # Second case: newly items add today
+                # Third case: there is an item which is deleted before, and now add into shop again
+                if doc['start_date'].date() == first_day.date(): # and deleted_item_before is None: # first ETL / First case
                     quantity_sold = 0
-                else: # launch a new item
-                    quantity_sold = doc['historical_sold']
-                    current_price = doc['current_price']
-            else: 
+
+                else: 
+                    # launch a new item or add items which were deleted before
+                    cursor_expired_items = men_shop_collection.find({'itemid': doc['itemid'], 'current_flag': 'Expired'}) # this will return a cursor, use list() to turn it into python list class
+                    lst_expried_items = list(cursor_expired_items)
+
+                    if len(lst_expried_items): # Third case
+                        lastest_expried_items = sorted(lst_expried_items, key= lambda x: x['expiration_date'], reverse=True)[0]
+                        quantity_sold = doc['historical_sold'] - lastest_expried_items['historical_sold']
+                        current_price = doc['current_price']                       
+                    else: # Second case
+                        quantity_sold = doc['historical_sold']
+                        current_price = doc['current_price']
+
+            else:
+                # so we have a previous expired items, just take current date - previous date to get quantity different
                 quantity_sold = doc['historical_sold'] - expired_item['historical_sold']
                 current_price = expired_item['current_price']
                 doc = expired_item
@@ -192,6 +206,7 @@ def get_daily_revenue():
                     "historical_sold": doc["historical_sold"],
                     "price_before_discount": doc["price_before_discount"],
                     "images_url": doc["images_url"],
+                    "create_time": doc["create_time"]
                 })
 
                 rating = db['rating_dim'].find_one({
@@ -210,6 +225,12 @@ def get_daily_revenue():
                     "discount_rate": doc["discount"]
                 })
 
+                shop_info = db['shop_dim'].find_one({
+                    "shopid": doc["shopid"],
+                    "shop_name": doc["shop_name"],
+                    "shop_rating": doc["shop_rating"]
+                })
+
                 current_date = datetime.now()-timedelta(days=delay_time)
                 current_date_without_hour = current_date.strftime("%Y-%m-%d")
 
@@ -221,6 +242,7 @@ def get_daily_revenue():
                 item['rating_id'] = rating['_id']
                 item['discount_id'] = discount['_id']
                 item['time_id'] = time['_id']
+                item['shop_info_id'] = shop_info['_id']
 
                 bulk.append(ReplaceOne(item, item, upsert=True))
 
@@ -242,14 +264,14 @@ def get_daily_revenue():
 if __name__ == '__main__':
 
     # default is 1 day
-    delay_time = 1
+    delay_time = generall_setting.delay_time_for_first_day_run_ETL
 
     # Connect to MongoDB
     client = MongoClient("mongodb://192.168.1.20:27017")
 
     # Access the MongoDB database and collection
-    db = client["ShopeeVN_airflow"]
-    men_shop_collection = db["MenClothingShop_airflow"]
+    db = client[generall_setting.Mongo_Database] #testing. Change back to ShopeeVN_airflow
+    men_shop_collection = db[generall_setting.Mongo_Collection]
     first_day = time_setting.start_time # it will delay one 1 day when read data from MongoDB. Spark read an exact day, but pymongo read 1 day delay
 
     # insert new items

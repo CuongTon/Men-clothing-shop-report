@@ -1,12 +1,16 @@
 from pyspark.sql import SparkSession
 import secret
+import sys
+sys.path.append('/home/cuongton/airflow/')
+from project_setting import generall_setting
+from datetime import date, timedelta
 
 def fetch_data_S3(spark, S3_path):
     # read data from S3
     raw_data = spark.read \
         .format('json') \
         .option('multiline', 'true') \
-        .load(S3_Path) #change
+        .load(S3_Path) # testing. Change it back S3_path when finish testing
     # tranform data
     data = raw_data.selectExpr('itemid', "shopid", 'shop_name', 'name', 'stock', "historical_sold",
                                'price/100000 as current_price', "price_min/100000 as current_price_min", "price_max/100000 as current_price_max",
@@ -17,7 +21,7 @@ def fetch_data_S3(spark, S3_path):
                                'item_rating.rating_star as rating_star', 'item_rating.rating_count[0] as total_vote', 'item_rating.rating_count[5] as five_stars',
                                'item_rating.rating_count[4] as four_stars', 'item_rating.rating_count[3] as three_stars', 'item_rating.rating_count[2] as two_stars',
                                'item_rating.rating_count[1] as one_star', "liked_count", "cmt_count", "shop_rating", "concat('https://down-vn.img.susercontent.com/file/', image) as images_url",
-                               "'Current' as current_flag", "current_date() as start_date", "date('2999-12-31') as expiration_date"
+                               "'Current' as current_flag", f"date('{current_date}') as start_date", "date('2999-12-31') as expiration_date"
                                )
     return data
 
@@ -40,13 +44,16 @@ if __name__ == '__main__':
     spark.sparkContext._jsc.hadoopConfiguration().set("fs.s3a.access.key", secret.Access_Key)
     spark.sparkContext._jsc.hadoopConfiguration().set("fs.s3a.secret.key", secret.Secret_Key)
 
+    # set current date. Default timedelta is 0
+    current_date = date.today() - timedelta(days=generall_setting.delay_time_for_rerun_S3)
+
     # read data from S3
-    S3_Path = 's3a://shopeeproject/ShopeeShop/MenClothingShop.json'
+    S3_Path = generall_setting.S3_path
     MenClothing = fetch_data_S3(spark, S3_Path)
 
     # load data to MongoDB
     total_items = MenClothing.count()
-    database = 'ShopeeVN_airflow' # changelater
-    collection = 'MenClothingShop_airflow' # changelater
+    database = generall_setting.Mongo_Database 
+    collection = generall_setting.Mongo_Collection 
     load_data_to_MongoDB(MenClothing, 'overwrite', database, collection)
     logger.warn(f'Successfully load {total_items} into MongoDB Warehouse')
