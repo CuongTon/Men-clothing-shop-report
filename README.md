@@ -1,4 +1,4 @@
-# Men's Clothing Shop Project
+# Men's Clothing Shop Project (Version 1.1)
 ## I. Project Demo
 ### 1. Mens's Clothing Shop Dashboard run by Power BI (URL: https://www.novypro.com/project/mens-clothing-shop---daily-update)
 
