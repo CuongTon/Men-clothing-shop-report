@@ -16,3 +16,6 @@ class generall_setting():
    S3_Bucket = 'shopeeproject'
    S3_Key = 'ShopeeShop/MenClothingShop.json'
    S3_path = f's3a://{S3_Bucket}/{S3_Key}'
+
+   # Folder_name_staging_layer: affect group_dags and Merge_and_Put_S3
+   folder_name_staging_layer = "RawData" #default is RawData

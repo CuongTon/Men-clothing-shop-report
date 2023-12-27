@@ -3,7 +3,7 @@ from airflow.operators.bash import BashOperator
 from airflow.utils.task_group import TaskGroup
 import sys
 sys.path.append('/home/cuongton/airflow/')
-from project_setting import shop_setting
+from project_setting import shop_setting, generall_setting
 from datetime import datetime
 
 
@@ -23,7 +23,7 @@ def download_task():
                 bash_command=f'''
                     source ~/airflow/bin/activate
                     cd /home/cuongton/airflow/project_code/crawl_shopee_data
-                    scrapy crawl {shop} -O RawData/{current_date.year}/{current_date.month}/{current_date.day}/{shop}.json
+                    scrapy crawl {shop} -O {generall_setting.folder_name_staging_layer}/{current_date.year}/{current_date.month}/{current_date.day}/{shop}.json
                 '''
             )
             if num % 2 == 0:
