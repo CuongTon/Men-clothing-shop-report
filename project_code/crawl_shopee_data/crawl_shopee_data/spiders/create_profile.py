@@ -1,7 +1,7 @@
 # import undetected_chromedriver as webdriver
 # import time
 
-# shop_list = ['First', 'Second']
+# shop_list = ['test_First', 'test_Second', 'test_Third', 'test_Fourth', 'test_Fifth']
 # for i in shop_list:
 #     chrome_options = webdriver.ChromeOptions()
 #     chrome_options.add_argument(f"--user-data-dir=project_code/crawl_shopee_data/crawl_shopee_data/ChromeProfile/{i}_Profile")

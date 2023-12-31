@@ -11,6 +11,7 @@ class KraftvnSpider(scrapy.Spider):
     name = "Routine"
     shop_id = 210001661
     google_search_shop_link_first_page = 'https://shopee.vn/routinevn?page=0'
+    chrome_profile_path = 'crawl_shopee_data/ChromeProfile/default_Fourth_Profile'
 
     # distract scrapy
     allowed_domains = ["github.com"]
@@ -30,7 +31,7 @@ class KraftvnSpider(scrapy.Spider):
 
         # set up selenium
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument(f"--user-data-dir=crawl_shopee_data/ChromeProfile/First_Profile")
+        chrome_options.add_argument(f"--user-data-dir={self.chrome_profile_path}")
         chrome_options.add_argument("--profile-directory=shopee_profile")
         chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
         self.driver = webdriver.Chrome(options=chrome_options, driver_executable_path='/home/cuongton/airflow/chromedriver-linux64/chromedriver-linux64/chromedriver')

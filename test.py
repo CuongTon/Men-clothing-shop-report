@@ -114,8 +114,82 @@ print(mylist is None)
 # delete_dim_list.forEach( function (collection) { if (db.getCollectionNames().indexOf(collection)>=0) { db.getCollection(collection).drop(); print("Deleted Collection: "+ collection); } })
 
 
-S3_Bucket = 'shopeeproject'
-S3_Key = 'ShopeeShop/MenClothingShop.json'
-S3_path = f's3a://{S3_Bucket}/{S3_Key}'
+# S3_Bucket = 'shopeeproject'
+# S3_Key = 'ShopeeShop/MenClothingShop.json'
+# S3_path = f's3a://{S3_Bucket}/{S3_Key}'
 
-print(S3_path)
+# print(S3_path)
+
+
+from airflow import DAG
+from airflow.operators.bash import BashOperator
+from airflow.utils.task_group import TaskGroup
+import sys
+sys.path.append('/home/cuongton/airflow/')
+from project_setting import shop_setting, generall_setting
+from datetime import datetime              
+
+current_date = datetime.today()
+shop_list = shop_setting.shop_list
+
+
+for shop in shop_list:
+    bash_command=f'''
+    source ~/airflow/bin/activate
+    cd /home/cuongton/airflow/project_code/crawl_shopee_data
+    scrapy crawl {shop} -O {generall_setting.folder_name_staging_layer}/{current_date.year}/{current_date.month}/{current_date.day}/{shop}.json
+'''
+    print(bash_command)    
+
+
+'''
+   source ~/airflow/bin/activate
+    cd /home/cuongton/airflow/project_code/crawl_shopee_data
+    scrapy crawl 4MEN -O RawData/2023/12/29/4MEN.json
+    done
+
+    source ~/airflow/bin/activate
+    cd /home/cuongton/airflow/project_code/crawl_shopee_data
+    scrapy crawl Biluxury -O RawData/2023/12/29/Biluxury.json
+    done
+
+    source ~/airflow/bin/activate
+    cd /home/cuongton/airflow/project_code/crawl_shopee_data
+    scrapy crawl Coolmate -O RawData/2023/12/29/Coolmate.json
+    done
+
+    source ~/airflow/bin/activate
+    cd /home/cuongton/airflow/project_code/crawl_shopee_data
+    scrapy crawl Highway -O RawData/2023/12/29/Highway.json
+    done
+
+    source ~/airflow/bin/activate
+    cd /home/cuongton/airflow/project_code/crawl_shopee_data
+    scrapy crawl Justmen -O RawData/2023/12/29/Justmen.json
+    done
+
+    source ~/airflow/bin/activate
+    cd /home/cuongton/airflow/project_code/crawl_shopee_data
+    scrapy crawl Kraftvn -O RawData/2023/12/29/Kraftvn.json
+    done
+
+    source ~/airflow/bin/activate
+    cd /home/cuongton/airflow/project_code/crawl_shopee_data
+    scrapy crawl Levents -O RawData/2023/12/29/Levents.json
+    done
+
+    source ~/airflow/bin/activate
+    cd /home/cuongton/airflow/project_code/crawl_shopee_data
+    scrapy crawl Routine -O RawData/2023/12/29/Routine.json
+    done
+
+    source ~/airflow/bin/activate
+    cd /home/cuongton/airflow/project_code/crawl_shopee_data
+    scrapy crawl SSSTUTTER -O RawData/2023/12/29/SSSTUTTER.json
+    done
+
+    source ~/airflow/bin/activate
+    cd /home/cuongton/airflow/project_code/crawl_shopee_data
+    scrapy crawl YaMe -O RawData/2023/12/29/YaMe.json
+    
+'''

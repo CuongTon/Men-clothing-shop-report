@@ -6,6 +6,7 @@ from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOpe
 from datetime import datetime
 from pymongo import MongoClient 
 from group_dags.subdag_download import download_task
+from group_dags.check_log_in import check_log_in_available
 import sys
 sys.path.append('/home/cuongton/airflow/')
 from project_setting import time_setting, generall_setting
@@ -36,6 +37,8 @@ with DAG(
     )
 
     download_raw_data = download_task()
+
+    check_log_in = check_log_in_available()
 
     merge_and_put_S3 = BashOperator(
         task_id = "merge_and_put_S3",
@@ -74,6 +77,6 @@ with DAG(
         trigger_rule = "none_failed"
     )
 
-    start >> download_raw_data >> merge_and_put_S3 >> is_the_first_time >> [initial_load, incremental_load] >> daily_sale_data_mart >> end
+    start >> check_log_in >> download_raw_data >> merge_and_put_S3 >> is_the_first_time >> [initial_load, incremental_load] >> daily_sale_data_mart >> end
     
 

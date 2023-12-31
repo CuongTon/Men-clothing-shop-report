@@ -15,7 +15,7 @@ def download_task():
         current_date = datetime.today()
 
         shop_list = shop_setting.shop_list
-        tasks_list = []
+        tasks_even = []
       
         for num, shop in enumerate(shop_list):
             task = BashOperator(
@@ -27,11 +27,11 @@ def download_task():
                 '''
             )
 
-            tasks_list.append(task)
+            tasks_even.append(task)
 
             if num % 2 == 1:
-                tasks_list[0] >> tasks_list[1]
-                tasks_list = []
+                tasks_even[0] >> tasks_even[1]
+                tasks_even = []
 
         return group
     
