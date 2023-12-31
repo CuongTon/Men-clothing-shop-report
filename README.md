@@ -45,8 +45,3 @@ Data is automatically gathered from the E-Commerce Website daily, then transferr
 * Use **Airflow** for workflow management. Schedule above tasks and run them on a daily basis.
 
 * This project was run on **Ubuntu** (Windows Subsystem for Linux).
-
-
-TypeDecorator JSONField() will not produce a cache key because the ``cache_ok`` attribute is not set to True.  This can have significant performance implications including some performance degradations in comparison to prior SQLAlchemy versions.  Set this attribute to True if this type object's state is safe to use in a cache key, or False to disable this warning. (Background on this error at: https://sqlalche.me/e/14/cprf)
-
-ERROR - Marking run <DagRun daily_sale_dashboard @ 2023-12-28 09:00:00+00:00: scheduled__2023-12-28T09:00:00+00:00, state:running, queued_at: 2023-12-29 02:05:27.786757+00:00. externally triggered: False> failed
