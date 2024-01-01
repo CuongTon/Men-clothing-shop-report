@@ -1,5 +1,5 @@
 from airflow import DAG
-from airflow.operators.python import BranchPythonOperator
+from airflow.operators.python import BranchPythonOperator, PythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.empty import EmptyOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
@@ -7,6 +7,7 @@ from datetime import datetime
 from pymongo import MongoClient 
 from group_dags.subdag_download import download_task
 from group_dags.check_log_in import check_log_in_available
+from group_dags.ETL_daily_sale import ETL_daily_sale
 import sys
 sys.path.append('/home/cuongton/airflow/')
 from project_setting import time_setting, generall_setting
@@ -68,14 +69,7 @@ with DAG(
         packages='org.apache.hadoop:hadoop-aws:3.3.1,org.apache.hadoop:hadoop-common:3.3.1,org.mongodb.spark:mongo-spark-connector_2.12:3.0.2'
     )
 
-    daily_sale_data_mart = BashOperator(
-        task_id = 'daily_sale_data_mart',
-        bash_command='''
-            source ~/airflow/bin/activate
-            python3 /home/cuongton/airflow/project_code/data_mart_etl/daily_sale_star_schema.py
-        ''',
-        trigger_rule = "none_failed"
-    )
+    daily_sale_data_mart = ETL_daily_sale()
 
     start >> check_log_in >> download_raw_data >> merge_and_put_S3 >> is_the_first_time >> [initial_load, incremental_load] >> daily_sale_data_mart >> end
     

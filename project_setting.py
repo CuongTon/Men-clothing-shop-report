@@ -11,7 +11,7 @@ class shop_setting():
 
 
 class generall_setting():
-   Mongo_Database = 'ShopeeVN_airflow_test' #testing. Default ShopeeVN_airflow
+   Mongo_Database = 'ShopeeVN_airflow' #testing. Default ShopeeVN_airflow.
    Mongo_Collection = 'MenClothingShop_airflow' 
    delay_time_for_rerun_S3 = 0 # adjust time for Merge_and_Put_s3, initial and incremental ETL. Default is 0
    delay_time_for_first_day_run_ETL = 1 # adjust time for daily_sale_star_schema. Default is 1
@@ -22,7 +22,4 @@ class generall_setting():
    S3_path = f's3a://{S3_Bucket}/{S3_Key}'
 
    # Folder_name_staging_layer: affect group_dags and Merge_and_Put_S3
-   folder_name_staging_layer = "RawData_1" #default is RawData
-
-   # password
-   google_password = '184206888'
+   folder_name_staging_layer = "RawData" #default is RawData.

@@ -5,7 +5,7 @@ import time
 import logging
 import sys
 sys.path.append('/home/cuongton/airflow/')
-from project_setting import generall_setting
+from project_code.crawl_shopee_data.crawl_shopee_data import secret
 
 def check_log_in_shopee_page(url, true_condition, true_condition_afer_log_in, profile_path, profile_name, google_password):
     
@@ -74,4 +74,4 @@ if __name__ == "__main__":
     profile_path = sys.argv[1]
     profile_name = 'shopee_profile'
     re_log_in = 'https://shopee.vn/?is_from_login=true'
-    check_log_in_shopee_page(shopee_url, log_in_page_success, re_log_in, profile_path, profile_name, generall_setting.google_password)
+    check_log_in_shopee_page(shopee_url, log_in_page_success, re_log_in, profile_path, profile_name, secret.google_password)

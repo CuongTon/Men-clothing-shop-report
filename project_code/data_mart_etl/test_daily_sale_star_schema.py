@@ -20,8 +20,6 @@ class ETL_daily_sale_data_mart:
 
         # default is 1 day
         self.delay_time = generall_setting.delay_time_for_first_day_run_ETL
-        self.current_date = datetime.now()-timedelta(days=self.delay_time)
-        self.start_of_day = datetime(self.current_date.year, self.current_date.month, self.current_date.day, 0, 0, 0, 0)
 
         # Connect to MongoDB
         self.client = MongoClient("mongodb://192.168.1.20:27017")
@@ -35,7 +33,7 @@ class ETL_daily_sale_data_mart:
     def get_product(self):
 
         bulk = []
-        documents = self.men_shop_collection.find({'start_date': {'$gt': self.start_of_day}})
+        documents = self.men_shop_collection.find()
 
         for doc in documents:
             item = {
@@ -62,7 +60,7 @@ class ETL_daily_sale_data_mart:
     # Function to create rating_dim collection.
     def get_rating(self):
         bulk = []
-        documents = self.men_shop_collection.find({'start_date': {'$gt': self.start_of_day}})
+        documents = self.men_shop_collection.find()
 
         for doc in documents:
             item = {
@@ -91,7 +89,7 @@ class ETL_daily_sale_data_mart:
     # Function to create discount_dim collection.
     def get_discount(self):
         bulk = []
-        documents = self.men_shop_collection.find({'start_date': {'$gt': self.start_of_day}})
+        documents = self.men_shop_collection.find()
 
         for doc in documents:
             item = {
@@ -112,7 +110,7 @@ class ETL_daily_sale_data_mart:
     # Function to create shop_dim collection.
     def get_shop(self):
         bulk = []
-        documents = self.men_shop_collection.find({'start_date': {'$gt': self.start_of_day}})
+        documents = self.men_shop_collection.find()
 
         for doc in documents:
             item = {
@@ -137,12 +135,13 @@ class ETL_daily_sale_data_mart:
     def get_time(self):
         bulk = []
 
-        current_date_without_hour = self.current_date.strftime("%Y-%m-%d")
-        current_day = self.current_date.day
-        current_week = self.current_date.isocalendar()[1]
-        current_month = self.current_date.month    
-        current_quarter = math.ceil(self.current_date.month / 3)
-        current_year = self.current_date.year
+        current_date = datetime.now()-timedelta(days=self.delay_time)
+        current_date_without_hour = current_date.strftime("%Y-%m-%d")
+        current_day = current_date.day
+        current_week = current_date.isocalendar()[1]
+        current_month = current_date.month    
+        current_quarter = math.ceil(current_date.month / 3)
+        current_year = current_date.year
 
         item = {
             "date": current_date_without_hour,
@@ -168,7 +167,7 @@ class ETL_daily_sale_data_mart:
     # Function to create daily_sale_fact collection.
     def get_daily_revenue(self):
         bulk = []
-        documents = self.men_shop_collection.find({'start_date': {'$gt': self.start_of_day}})
+        documents = self.men_shop_collection.find()
         
         for doc in documents:
             # find new document which is inserted today and the status is current
@@ -280,18 +279,29 @@ class ETL_daily_sale_data_mart:
 
 if __name__ == '__main__':
 
-    ETL_daily_sale_data_mart().get_product()
-    ETL_daily_sale_data_mart().get_rating()
-    ETL_daily_sale_data_mart().get_discount()
-    ETL_daily_sale_data_mart().get_shop()
-    ETL_daily_sale_data_mart().get_time()
-    ETL_daily_sale_data_mart().get_daily_revenue()
+    # default is 1 day
+    delay_time = generall_setting.delay_time_for_first_day_run_ETL
 
-'''
-db.daily_sale_fact.drop()
-db.discount_dim.drop()
-db.product_detail_dim.drop()
-db.rating_dim.drop()
-db.shop_dim.drop()
-db.time_dim.drop()
-'''
+    # Connect to MongoDB
+    client = MongoClient("mongodb://192.168.1.20:27017")
+
+    # Access the MongoDB database and collection
+    db = client[generall_setting.Mongo_Database] #testing. Change back to ShopeeVN_airflow
+    men_shop_collection = db[generall_setting.Mongo_Collection]
+    first_day = time_setting.start_time # it will delay one 1 day when read data from MongoDB. Spark read an exact day, but pymongo read 1 day delay
+
+    now = datetime.now()-timedelta(days=delay_time) 
+    start_of_day = datetime(now.year, now.month, now.day, 0, 0, 0, 0)
+    print(start_of_day)
+    items = db['MenClothingShop_airflow'].find({'start_date': {'$gt': start_of_day}})
+    
+    for i in items:
+        print(i['start_date'])
+
+    # # insert new items
+    # ETL_daily_sale_data_mart().get_product()
+    # ETL_daily_sale_data_mart().get_rating()
+    # ETL_daily_sale_data_mart().get_discount()
+    # ETL_daily_sale_data_mart().get_shop()
+    # ETL_daily_sale_data_mart().get_time()
+    # ETL_daily_sale_data_mart().get_daily_revenue()
