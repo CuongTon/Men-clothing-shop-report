@@ -195,7 +195,9 @@ class ETL_daily_sale_data_mart:
                         if len(lst_expried_items): # Third case
                             lastest_expried_items = sorted(lst_expried_items, key= lambda x: x['expiration_date'], reverse=True)[0]
                             quantity_sold = doc['historical_sold'] - lastest_expried_items['historical_sold']
-                            current_price = doc['current_price']                       
+                            current_price = doc['current_price']
+                        elif doc['create_time'].date() <  self.first_day.date(): # TBU check this line
+                            quantity_sold = 0                                            
                         else: # Second case
                             quantity_sold = doc['historical_sold']
                             current_price = doc['current_price']

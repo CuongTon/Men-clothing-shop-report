@@ -50,6 +50,14 @@ with DAG(
         """
     )
 
+    replica_task = BashOperator(
+        task_id = 'replica_task',
+        bash_command="""
+            source ~/airflow/bin/activate
+            python3 /home/cuongton/airflow/project_code/spark_app_etl/Replica_source.py
+        """
+    )
+
     is_the_first_time = BranchPythonOperator(
         task_id = 'is_the_first_time',
         python_callable=_is_the_first_time
@@ -72,5 +80,5 @@ with DAG(
     daily_sale_data_mart = ETL_daily_sale()
 
     start >> check_log_in >> download_raw_data >> merge_and_put_S3 >> is_the_first_time >> [initial_load, incremental_load] >> daily_sale_data_mart >> end
-    
+    download_raw_data >> replica_task >> end
 
