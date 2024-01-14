@@ -4,12 +4,12 @@
 
 ![Alt text](<Introduce/PowerBI Demo 3x speed.gif>)
 ### 2. Aiflow Workflow
-![Alt text](image.png)
+![Alt text](<Introduce/Blueprint - v1.2.png>)
 
 ## II. Introduction
 
 ### 1. Blueprint
-![Alt text](<Introduce/Blueprint - v1.2.png>)
+![Alt text](Introduce/Blueprint.png)
 
 ### 2. Summary
 Create a daily report for multiple men's clothing shops on an e-commerce website.
