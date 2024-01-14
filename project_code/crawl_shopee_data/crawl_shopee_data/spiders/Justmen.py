@@ -80,7 +80,7 @@ class KraftvnSpider(scrapy.Spider):
         # get api response in multiple pages
         while items_crawled < total_items:
             # crawl api response
-            print(f'{"-"*10} Page: {page_number} {"-"*10}')
+            self.logger.info(f'{"-"*20} Page: {page_number} {"-"*20}')
             url = f'https://shopee.vn/api/v4/shop/rcmd_items?bundle=shop_page_category_tab_main&limit=30&offset={off_set}&shop_id={self.shop_id}&sort_type=1&upstream='
             # handle repsonse
             xhr_body = self._get_response_XHR(url)
@@ -100,6 +100,12 @@ class KraftvnSpider(scrapy.Spider):
             # move to the next page
             next_page = self.driver.find_element(By.XPATH, '//button[@class="shopee-icon-button shopee-icon-button--right "]')
             next_page.click()
+            self.logger.info(f"Page {page_number-1}: total number of items is {total_items}, total items have been crawled is {items_crawled}")
+        
+        self.logger.info(f'{"-"*20} Final Stats {"-"*20}')
+        self.logger.info(f"Complete: total number of items is {total_items}, total items have been crawled is {items_crawled}")
+        self.logger.info(f'{"-"*20} Ending {"-"*20}')
+        print(total_items)
 
         # close driver
         time.sleep(2)

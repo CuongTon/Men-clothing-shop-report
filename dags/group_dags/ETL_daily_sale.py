@@ -2,9 +2,7 @@ from airflow.operators.python import PythonOperator
 from airflow.utils.task_group import TaskGroup
 import sys
 sys.path.append('/home/cuongton/airflow/')
-from project_setting import shop_setting, generall_setting
 from project_code.data_mart_etl.daily_sale_star_schema import ETL_daily_sale_data_mart
-from datetime import datetime
 
 def ETL_daily_sale():
 

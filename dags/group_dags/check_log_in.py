@@ -1,10 +1,9 @@
-from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.utils.task_group import TaskGroup
 import sys
 sys.path.append('/home/cuongton/airflow/')
-from project_setting import shop_setting, generall_setting
-from datetime import datetime
+from project_setting import shop_setting
+
 
 def check_log_in_available():
 

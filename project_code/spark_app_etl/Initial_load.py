@@ -10,7 +10,7 @@ def fetch_data_S3(spark, S3_path):
     raw_data = spark.read \
         .format('json') \
         .option('multiline', 'true') \
-        .load(S3_Path) # testing. Change it back S3_path when finish testing
+        .load(S3_path) # testing. Change it back S3_path when finish testing
     # tranform data
     data = raw_data.selectExpr('itemid', "shopid", 'shop_name', 'name', 'stock', "historical_sold",
                                'price/100000 as current_price', "price_min/100000 as current_price_min", "price_max/100000 as current_price_max",

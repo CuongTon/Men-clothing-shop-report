@@ -4,22 +4,18 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
 import json
+import sys
 
 class KraftvnSpider(scrapy.Spider):
     
-    #general information
-    name = "Kraftvn"
-    shop_id = 623651329
-    google_search_shop_link_first_page = 'https://shopee.vn/kraftvn#product_list'
-    chrome_profile_path = 'crawl_shopee_data/ChromeProfile/default_Third_Profile'
-
     # distract scrapy
-    allowed_domains = ["github.com"]
-    start_urls = ["https://github.com"]
+    name = "Master"
+    allowed_domains = ["scrapy.org"] # just fake
+    start_urls = ["https://scrapy.org"] # just fake
 
     # S3 file configuration
     # custom_settings = {
-    #     'FEEDS':{f's3://shopeeproject/Kraftvn/{name}.json': {
+    #     'FEEDS':{f's3://shopeeproject/Kraftvn/{shop_name}.json': {
     #         'format': 'json',
     #         'encoding': 'utf8',
     #         'store_empty': False,
@@ -27,8 +23,16 @@ class KraftvnSpider(scrapy.Spider):
     #     }
     # }
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        # send arguments into spider
+        super().__init__(*args, **kwargs)
 
+        # -a para_1="Kraftvn" -a para_2=623651329 -a para_3='https://shopee.vn/kraftvn#product_list' -a para_4='crawl_shopee_data/ChromeProfile/default_Third_Profile'
+        self.shop_name = self.para_1 #"Kraftvn"
+        self.shop_id = int(self.para_2) #623651329
+        self.google_search_shop_link_first_page = self.para_3 #'https://shopee.vn/kraftvn#product_list'
+        self.chrome_profile_path = self.para_4 #'crawl_shopee_data/ChromeProfile/default_Third_Profile'
+        
         # set up selenium
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument(f"--user-data-dir={self.chrome_profile_path}")
@@ -71,6 +75,7 @@ class KraftvnSpider(scrapy.Spider):
 
     def parse(self, response):
         # set up variables, to move next page and control while loop
+
         off_set = 0
         items_crawled = 0
         total_items = 1
@@ -94,7 +99,7 @@ class KraftvnSpider(scrapy.Spider):
 
             # save output
             for item in items_list:
-                item['shop_name'] = self.name
+                item['shop_name'] = self.shop_name
                 yield item
 
             # move to the next page
@@ -105,6 +110,7 @@ class KraftvnSpider(scrapy.Spider):
         self.logger.info(f'{"-"*20} Final Stats {"-"*20}')
         self.logger.info(f"Complete: total number of items is {total_items}, total items have been crawled is {items_crawled}")
         self.logger.info(f'{"-"*20} Ending {"-"*20}')
+        # Need to print out total_items, it will automatically send to XCOM of Aiflow.
         print(total_items)
 
         # close driver

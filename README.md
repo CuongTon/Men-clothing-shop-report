@@ -1,18 +1,15 @@
-# Men's Clothing Shop Project (Version 1.1)
+# Men's Clothing Shop Project (Version 1.2)
 ## I. Project Demo
 ### 1. Mens's Clothing Shop Dashboard run by Power BI (URL: https://www.novypro.com/project/mens-clothing-shop---daily-update)
 
 ![Alt text](<Introduce/PowerBI Demo 3x speed.gif>)
 ### 2. Aiflow Workflow
-#### Initial ETL
-![!\[Alt text\](<Introduce/PowerBI Demo 3x speed.gif>)](<Introduce/Initial ETL.gif>)
-#### Incremental ETL
-![Alt text](<Introduce/Incremental ETL.gif>)
+![Alt text](image.png)
 
 ## II. Introduction
 
 ### 1. Blueprint
-![Alt text](Introduce/Blueprint.png)
+![Alt text](<Introduce/Blueprint - v1.2.png>)
 
 ### 2. Summary
 Create a daily report for multiple men's clothing shops on an e-commerce website.

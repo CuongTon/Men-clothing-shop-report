@@ -588,3 +588,5 @@ RawData_1
 test_5_download_pages
 RawData_replica
 include/
+RawData*
+Old*

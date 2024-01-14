@@ -100,3 +100,5 @@ AWS_SECRET_ACCESS_KEY = secret.Secret_Key
 ITEM_PIPELINE = {
 'scrapy.pipelines.files.S3FilesStore': 1
 }
+
+LOG_LEVEL = 'INFO'

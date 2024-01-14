@@ -13,13 +13,13 @@ def combine_json_file(list_of_json_file):
 
     merged_data = []
     for file in list_of_json_file:
-        with open(f'/home/cuongton/airflow/project_code/crawl_shopee_data/{generall_setting.folder_name_staging_layer}/{current_date.year}/{current_date.month}/{current_date.day}/{file}.json', 'r', encoding='utf-8') as json_file:
+        with open(f'/home/cuongton/airflow/project_code/crawl_shopee_data/{generall_setting.folder_name_staging_layer}/{current_date.year}/{current_date.month}/{current_date.day}/{file["name"]}.json', 'r', encoding='utf-8') as json_file:
             merged_data = merged_data + (json.loads(json_file.read()))
     return merged_data
 
 if __name__ == '__main__':
 
-    json_list = shop_setting.shop_list
+    json_list = shop_setting.shop_details
     final_data = combine_json_file(json_list)
 
     s3 = boto3.client('s3', aws_access_key_id=secret.Access_Key, aws_secret_access_key=secret.Secret_Key)
