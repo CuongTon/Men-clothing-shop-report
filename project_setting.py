@@ -29,6 +29,61 @@ class shop_setting():
      },
      {"shop_id": 24710134,
      "name": "Coolmate",
+     "google_search_shop_link_first_page": "coolmate.vn#shopee",
+     "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Second_Profile"
+     },
+     {"shop_id": 413372243,
+     "name": "Highway",
+     "google_search_shop_link_first_page": "https://shopee.vn/highwaymenswear#product_list",
+     "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Second_Profile"
+     },
+     {"shop_id": 129448137,
+     "name": "Justmen",
+     "google_search_shop_link_first_page": "https://shopee.vn/justmen_officialstore#product_list",
+     "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Third_Profile"
+     },
+     {"shop_id": 623651329,
+     "name": "Kraftvn",
+     "google_search_shop_link_first_page": "https://shopee.vn/kraftvn#product_list",
+     "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Third_Profile"
+     },
+     {"shop_id": 317477677,
+     "name": "Levents",
+     "google_search_shop_link_first_page": "https://shopee.vn/levents.vn#product_list",
+     "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Fourth_Profile"
+     },
+     {"shop_id": 210001661,
+     "name": "Routine",
+     "google_search_shop_link_first_page": "https://shopee.vn/routinevn?page=0",
+     "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Fourth_Profile"
+     },
+     {"shop_id": 179042207,
+     "name": "SSSTUTTER",
+     "google_search_shop_link_first_page": "https://shopee.vn/ssstutter#product_list",
+     "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Fifth_Profile"
+     },
+     {"shop_id": 473918762,
+     "name": "YaMe",
+     "google_search_shop_link_first_page": "https://shopee.vn/yame_vn",
+     "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Fifth_Profile"
+     }
+]
+
+
+'''
+[
+    {"shop_id": 277366270,
+     "name": "4MEN",
+     "google_search_shop_link_first_page": "https://shopee.vn/4menstores#product_list",
+     "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_First_Profile"
+     },
+     {"shop_id": 68988783,
+     "name": "Biluxury",
+     "google_search_shop_link_first_page": "https://shopee.vn/thoitrangbiluxury#product_list",
+     "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_First_Profile"
+     },
+     {"shop_id": 24710134,
+     "name": "Coolmate",
      "google_search_shop_link_first_page": "https://shopee.vn/coolmate.vn",
      "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Second_Profile"
      },
@@ -69,9 +124,11 @@ class shop_setting():
      }
 ]
 
+'''
+
 class generall_setting():
    # Default: ShopeeVN_airflow
-   Mongo_Database = 'ShopeeVN_airflow'
+   Mongo_Database = 'ShopeeVN_airflow_test' #TBU
    Mongo_Collection = 'MenClothingShop_airflow' 
 
    # Default: 0
@@ -90,4 +147,4 @@ class generall_setting():
    # Folder_name_staging_layer: 
    # Affection: group_dags - download tasks, Merge_and_Put_S3, Replica_source
    # Default: RawData
-   folder_name_staging_layer = "RawData"
+   folder_name_staging_layer = "RawData_1" #TBU

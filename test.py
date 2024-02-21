@@ -201,6 +201,62 @@
 #     dct = json.dumps(lst, indent=1)
 #     print(dct)
 
+# shop_details = [
+#     {"shop_id": 277366270,
+#      "name": "4MEN",
+#      "google_search_shop_link_first_page": "https://shopee.vn/4menstores#product_list",
+#      "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_First_Profile"
+#      },
+#      {"shop_id": 68988783,
+#      "name": "Biluxury",
+#      "google_search_shop_link_first_page": "https://shopee.vn/thoitrangbiluxury#product_list",
+#      "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_First_Profile"
+#      },
+#      {"shop_id": 24710134,
+#      "name": "Coolmate",
+#      "google_search_shop_link_first_page": "https://shopee.vn/coolmate.vn",
+#      "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Second_Profile"
+#      },
+#      {"shop_id": 413372243,
+#      "name": "Highway",
+#      "google_search_shop_link_first_page": "https://shopee.vn/highwaymenswear#product_list",
+#      "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Second_Profile"
+#      },
+#      {"shop_id": 129448137,
+#      "name": "Justmen",
+#      "google_search_shop_link_first_page": "https://shopee.vn/justmen_officialstore#product_list",
+#      "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Third_Profile"
+#      },
+#      {"shop_id": 623651329,
+#      "name": "Kraftvn",
+#      "google_search_shop_link_first_page": "https://shopee.vn/kraftvn#product_list",
+#      "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Third_Profile"
+#      },
+#      {"shop_id": 317477677,
+#      "name": "Levents",
+#      "google_search_shop_link_first_page": "https://shopee.vn/levents.vn#product_list",
+#      "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Fourth_Profile"
+#      },
+#      {"shop_id": 210001661,
+#      "name": "Routine",
+#      "google_search_shop_link_first_page": "https://shopee.vn/routinevn?page=0",
+#      "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Fourth_Profile"
+#      },
+#      {"shop_id": 179042207,
+#      "name": "SSSTUTTER",
+#      "google_search_shop_link_first_page": "https://shopee.vn/ssstutter#product_list",
+#      "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Fifth_Profile"
+#      },
+#      {"shop_id": 473918762,
+#      "name": "YaMe",
+#      "google_search_shop_link_first_page": "https://shopee.vn/yame_vn",
+#      "chrome_profile_path": "crawl_shopee_data/ChromeProfile/default_Fifth_Profile"
+#      }
+# ]
+
+# for index, shop in enumerate(shop_details):
+#     print(f"scrapy crawl Master -a para_1={shop['name']} -a para_2={shop['shop_id']} -a para_3={shop['google_search_shop_link_first_page']} -a para_4={shop['chrome_profile_path']}")
+
 shop_details = [
     {"shop_id": 277366270,
      "name": "4MEN",
@@ -254,5 +310,91 @@ shop_details = [
      }
 ]
 
-for index, shop in enumerate(shop_details):
-    print(f"scrapy crawl Master -a para_1={shop['name']} -a para_2={shop['shop_id']} -a para_3={shop['google_search_shop_link_first_page']} -a para_4={shop['chrome_profile_path']}")
+from airflow import DAG
+from airflow.operators.bash import BashOperator
+from airflow.utils.task_group import TaskGroup
+import sys
+sys.path.append('/home/cuongton/airflow/')
+from project_setting import shop_setting, generall_setting
+from datetime import datetime
+
+current_date = datetime.today()
+
+for num, shop in enumerate(shop_details):
+    print(f''' scrapy crawl Master -a para_1={shop['name']} -a para_2={shop['shop_id']} -a para_3={shop['google_search_shop_link_first_page']} -a para_4={shop['chrome_profile_path']} -O {generall_setting.folder_name_staging_layer}/{current_date.year}/{current_date.month}/{current_date.day}/{shop['name']}.json
+            '''
+            )
+
+'''
+ scrapy crawl Master -a para_1=4MEN -a para_2=277366270 -a para_3=https://shopee.vn/4menstores#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_First_Profile -O RawData/2024/1/15/4MEN.json
+            
+ scrapy crawl Master -a para_1=Biluxury -a para_2=68988783 -a para_3=https://shopee.vn/thoitrangbiluxury#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_First_Profile -O RawData/2024/1/15/Biluxury.json
+            
+ scrapy crawl Master -a para_1=Coolmate -a para_2=24710134 -a para_3=https://shopee.vn/coolmate.vn -a para_4=crawl_shopee_data/ChromeProfile/default_Second_Profile -O RawData/2024/1/15/Coolmate.json
+            
+ scrapy crawl Master -a para_1=Highway -a para_2=413372243 -a para_3=https://shopee.vn/highwaymenswear#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_Second_Profile -O RawData/2024/1/15/Highway.json
+            
+ scrapy crawl Master -a para_1=Justmen -a para_2=129448137 -a para_3=https://shopee.vn/justmen_officialstore#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_Third_Profile -O RawData/2024/1/15/Justmen.json
+            
+ scrapy crawl Master -a para_1=Kraftvn -a para_2=623651329 -a para_3=https://shopee.vn/kraftvn#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_Third_Profile -O RawData/2024/1/15/Kraftvn.json
+            
+ scrapy crawl Master -a para_1=Levents -a para_2=317477677 -a para_3=https://shopee.vn/levents.vn#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_Fourth_Profile -O RawData/2024/1/15/Levents.json
+            
+ scrapy crawl Master -a para_1=Routine -a para_2=210001661 -a para_3=https://shopee.vn/routinevn?page=0 -a para_4=crawl_shopee_data/ChromeProfile/default_Fourth_Profile -O RawData/2024/1/15/Routine.json
+            
+ scrapy crawl Master -a para_1=SSSTUTTER -a para_2=179042207 -a para_3=https://shopee.vn/ssstutter#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_Fifth_Profile -O RawData/2024/1/15/SSSTUTTER.json
+            
+ scrapy crawl Master -a para_1=YaMe -a para_2=473918762 -a para_3=https://shopee.vn/yame_vn -a para_4=crawl_shopee_data/ChromeProfile/default_Fifth_Profile -O RawData/2024/1/15/YaMe.json
+'''
+
+# for i in shop_setting.profile_list:
+#     print(f"python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py {i}_Profile")
+
+
+# python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py default_First_Profile
+# python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py default_Second_Profile
+# python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py default_Third_Profile
+# python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py default_Fourth_Profile
+# python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py default_Fifth_Profile
+
+'''
+ scrapy crawl Master -a para_1=4MEN -a para_2=277366270 -a para_3=https://shopee.vn/4menstores#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_First_Profile -O RawData/2024/1/30/4MEN.json
+            
+ scrapy crawl Master -a para_1=Biluxury -a para_2=68988783 -a para_3=https://shopee.vn/thoitrangbiluxury#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_First_Profile -O RawData/2024/1/30/Biluxury.json
+            
+ scrapy crawl Master -a para_1=Coolmate -a para_2=24710134 -a para_3=https://shopee.vn/coolmate.vn -a para_4=crawl_shopee_data/ChromeProfile/default_Second_Profile -O RawData/2024/1/30/Coolmate.json
+            
+ scrapy crawl Master -a para_1=Highway -a para_2=413372243 -a para_3=https://shopee.vn/highwaymenswear#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_Second_Profile -O RawData/2024/1/30/Highway.json
+            
+ scrapy crawl Master -a para_1=Justmen -a para_2=129448137 -a para_3=https://shopee.vn/justmen_officialstore#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_Third_Profile -O RawData/2024/1/30/Justmen.json
+            
+ scrapy crawl Master -a para_1=Kraftvn -a para_2=623651329 -a para_3=https://shopee.vn/kraftvn#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_Third_Profile -O RawData/2024/1/30/Kraftvn.json
+            
+ scrapy crawl Master -a para_1=Levents -a para_2=317477677 -a para_3=https://shopee.vn/levents.vn#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_Fourth_Profile -O RawData/2024/1/30/Levents.json
+            
+ scrapy crawl Master -a para_1=Routine -a para_2=210001661 -a para_3=https://shopee.vn/routinevn?page=0 -a para_4=crawl_shopee_data/ChromeProfile/default_Fourth_Profile -O RawData/2024/1/30/Routine.json
+            
+ scrapy crawl Master -a para_1=SSSTUTTER -a para_2=179042207 -a para_3=https://shopee.vn/ssstutter#product_list -a para_4=crawl_shopee_data/ChromeProfile/default_Fifth_Profile -O RawData/2024/1/30/SSSTUTTER.json
+            
+ scrapy crawl Master -a para_1=YaMe -a para_2=473918762 -a para_3=https://shopee.vn/yame_vn -a para_4=crawl_shopee_data/ChromeProfile/default_Fifth_Profile -O RawData/2024/1/30/YaMe.json
+
+python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py default_First_Profile
+python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py default_Second_Profile
+python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py default_Third_Profile
+python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py default_Fourth_Profile
+python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py default_Fifth_Profile
+
+'''
+
+from airflow.operators.bash import BashOperator
+from airflow.utils.task_group import TaskGroup
+import sys
+sys.path.append('/home/cuongton/airflow/')
+from project_setting import shop_setting
+
+
+        
+for i in shop_setting.profile_list:
+
+        bash_command=f"python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py {i}_Profile"
+        print(bash_command)
