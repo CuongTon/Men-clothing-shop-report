@@ -1,5 +1,6 @@
 from airflow.operators.bash import BashOperator
 from airflow.utils.task_group import TaskGroup
+from datetime import timedelta
 import sys
 sys.path.append('/home/cuongton/airflow/')
 from project_setting import shop_setting
@@ -13,7 +14,9 @@ def check_log_in_available():
             
             task = BashOperator(
                 task_id = f'{i}_Profile',
-                bash_command=f"python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py {i}_Profile"
+                bash_command=f"python3 /home/cuongton/airflow/project_code/crawl_shopee_data/crawl_shopee_data/Check_Log_In.py {i}_Profile",
+                retries=3,
+                retry_delay=timedelta(seconds=10)
             )
 
         return group

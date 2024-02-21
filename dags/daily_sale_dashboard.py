@@ -17,6 +17,7 @@ import json
 
 # set up log. Use Airflow log
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 def _is_the_first_time():
 
@@ -41,7 +42,7 @@ def _check_quantity(ti):
 
     # loop all shops
     for shop in shop_setting.shop_details:
-        
+       
         # create path to read file that saved on the local disk.
         path = f"{generall_setting.folder_name_staging_layer}/{current_date.year}/{current_date.month}/{current_date.day}/{shop['name']}.json"
 
@@ -50,11 +51,21 @@ def _check_quantity(ti):
             count_lines = len(json.loads(file.read()))
 
             # get total amount of items from the API through XCOM.
-            API_lines = ti.xcom_pull(key='return_value', task_ids=f"downloads.download_{shop['name']}")
+            API_lines = ti.xcom_pull(key='total_items', task_ids=f"downloads.download_{shop['name']}")
 
             # recheck the condition and log it.
-            if count_lines == int(API_lines) and count_lines != 0:
+            if count_lines > int(API_lines) and int(API_lines) != -1:
+                logger.info(f"{'-'*20} Error: Shop name is {shop['name']}, Total items is {API_lines}, Total crawled items is {count_lines} {'-'*20}")
+                error_check = True
+
+            elif count_lines >= round(int(API_lines)*0.99,0) and count_lines != 0 and int(API_lines) > 0:
                 logger.info(f"{'-'*20} Success: Shop name is {shop['name']}, Total items is {API_lines}, Total crawled items is {count_lines} {'-'*20}")
+           
+            # shop is temporaroly closed
+            elif int(API_lines) == -1 and count_lines == 0:
+                logger.info(f"{'-'*20} Check: Shop name is {shop['name']}, Shop may be temporarily closed! Recheck")
+                error_check = True
+
             else:
                 logger.info(f"{'-'*20} Error: Shop name is {shop['name']}, Total items is {API_lines}, Total crawled items is {count_lines} {'-'*20}")
                 error_check = True

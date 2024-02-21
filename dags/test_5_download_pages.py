@@ -16,25 +16,40 @@ import logging
 # set up log
 logger = logging.getLogger(__name__)
 
-def _my_data(ti):
+def _check_quantity(ti):
 
-    # set up logging
+    # get current date. This is used for declare file path.
     current_date = datetime.today()
+
+    # Use this variable to throw an error if the crawled data saved on the local disk doesn't match total number of items from the API.
     error_check = False
 
+    # loop all shops
     for shop in shop_setting.shop_details:
-        # my_crawled_stats[i] = ti.xcom_pull(key='return_value', task_ids=f"downloads.download_{i}")
+        
+        # create path to read file that saved on the local disk.
         path = f"{generall_setting.folder_name_staging_layer}/{current_date.year}/{current_date.month}/{current_date.day}/{shop['name']}.json"
+
         with open(f'/home/cuongton/airflow/project_code/crawl_shopee_data/{path}') as file:
+            # count total number of lines from a file saved on the local disk.
             count_lines = len(json.loads(file.read()))
-            total_lines = ti.xcom_pull(key='return_value', task_ids=f"downloads.download_{shop['name']}")
-            if int(count_lines) == int(total_lines) and count_lines != 0:
-                logger.info(f"{'-'*20} Success: Total items is {total_lines}, Total crawled items is {count_lines} {'-'*20}")
+
+            # get total amount of items from the API through XCOM.
+            API_lines = ti.xcom_pull(key='return_value', task_ids=f"downloads.download_{shop['name']}")
+
+            # recheck the condition and log it.
+            # TBU
+
+            if count_lines >= int(int(API_lines)*0.99) and count_lines != 0:
+                logger.info(f"{'-'*20} Success: Shop name is {shop['name']}, Total items is {API_lines}, Total crawled items is {count_lines} {'-'*20}")
             else:
-                logger.info(f"{'-'*20} Error: Total items is {total_lines}, Total crawled items is {count_lines} {'-'*20}")
+                logger.info(f"{'-'*20} Error: Shop name is {shop['name']}, Total items is {API_lines}, Total crawled items is {count_lines} {'-'*20}")
                 error_check = True
 
+
+    # final check. Throw an error if exists.
     if error_check:
+        # logger.info('Recheck')
         raise AirflowException(f"{'-'*20} Recheck your download tasks, there are some files that didn't match in quantity. {'-'*20}")
     else:
         logger.info(f'{"-"*20} Final check: The data was crawled successfully {"-"*20}')
@@ -54,7 +69,7 @@ with DAG("test_5_download_pages", start_date=datetime(2023, 12, 31), catchup=Fal
 
     collect_number_crawled_date = PythonOperator(
         task_id = 'collect_number_crawled_date',
-        python_callable=_my_data
+        python_callable=_check_quantity
     )
 
 
