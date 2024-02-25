@@ -590,3 +590,6 @@ RawData_replica
 include/
 RawData*
 Old*
+day_setting.py
+delay_time.json
+test_delay_time.py

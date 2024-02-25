@@ -101,4 +101,5 @@ ITEM_PIPELINE = {
 'scrapy.pipelines.files.S3FilesStore': 1
 }
 
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'CRITICAL'
+# 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
