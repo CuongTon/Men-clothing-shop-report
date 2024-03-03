@@ -75,6 +75,8 @@ if __name__ == '__main__':
         .config('spark.jars.packages', 'org.apache.hadoop:hadoop-aws:3.3.1,org.apache.hadoop:hadoop-common:3.3.1,org.mongodb.spark:mongo-spark-connector_2.12:3.0.2') \
         .getOrCreate()
 
+    # Set log level
+    spark.sparkContext.setLogLevel("WARN")
     # set up spark to connect S3
     spark.sparkContext._jsc.hadoopConfiguration().set("fs.s3a.access.key", secret.Access_Key)
     spark.sparkContext._jsc.hadoopConfiguration().set("fs.s3a.secret.key", secret.Secret_Key)

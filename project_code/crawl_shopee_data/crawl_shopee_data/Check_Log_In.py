@@ -58,7 +58,7 @@ def check_log_in_shopee_page(url, true_condition, true_condition_afer_log_in, pr
         pass
 
     # term of sharing account
-    google_sharing_term = driver.find_element(By.XPATH, '(//span[@class="VfPpkd-vQzf8d"])[2]')
+    google_sharing_term = driver.find_element(By.XPATH, '(//span[@class="VfPpkd-vQzf8d"])[3]')
     if google_sharing_term:
         google_sharing_term.click()
         time.sleep(2)

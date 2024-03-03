@@ -2,6 +2,7 @@ from airflow import DAG
 from airflow.operators.python import BranchPythonOperator, PythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.empty import EmptyOperator
+from airflow.operators.email import EmailOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.exceptions import AirflowException
 from datetime import datetime
@@ -14,6 +15,15 @@ sys.path.append('/home/cuongton/airflow/')
 from project_setting import time_setting, generall_setting, shop_setting
 import logging
 import json
+import pandas as pd
+
+# set up airflow
+default_args = {
+    'owner': 'CuongTon',
+    'email': ['longquecuidx11@gmail.com'],
+    'email_on_failure': True,
+    'email_on_retry': False,
+}
 
 # set up log. Use Airflow log
 logger = logging.getLogger(__name__)
@@ -40,12 +50,15 @@ def _check_quantity(ti):
     # Use this variable to throw an error if the crawled data saved on the local disk doesn't match total number of items from the API.
     error_check = False
 
+    # Create a table log
+    df = pd.DataFrame(columns=['status', 'shop_name', 'total_items', 'crawled_items', 'percentage'])
+
     # loop all shops
     for shop in shop_setting.shop_details:
        
         # create path to read file that saved on the local disk.
         path = f"{generall_setting.folder_name_staging_layer}/{current_date.year}/{current_date.month}/{current_date.day}/{shop['name']}.json"
-
+        
         with open(f'/home/cuongton/airflow/project_code/crawl_shopee_data/{path}') as file:
             # count total number of lines from a file saved on the local disk.
             count_lines = len(json.loads(file.read()))
@@ -55,32 +68,36 @@ def _check_quantity(ti):
 
             # recheck the condition and log it.
             if count_lines > int(API_lines) and int(API_lines) != -1:
-                logger.info(f"{'-'*20} Error: Shop name is {shop['name']}, Total items is {API_lines}, Total crawled items is {count_lines} {'-'*20}")
                 error_check = True
+                df.loc[len(df)] = ['Error', shop['name'], API_lines, count_lines, f'{count_lines*100/int(API_lines)}%']
 
             elif count_lines >= round(int(API_lines)*0.99,0) and count_lines != 0 and int(API_lines) > 0:
-                logger.info(f"{'-'*20} Success: Shop name is {shop['name']}, Total items is {API_lines}, Total crawled items is {count_lines} {'-'*20}")
-           
+               df.loc[len(df)] = ['Success', shop['name'], API_lines, count_lines, f'{count_lines*100/int(API_lines)}%']
+
             # shop is temporaroly closed
             elif int(API_lines) == -1 and count_lines == 0:
-                logger.info(f"{'-'*20} Check: Shop name is {shop['name']}, Shop may be temporarily closed! Recheck")
                 error_check = True
+                df.loc[len(df)] = ['Check', shop['name'], -1, -1, '0%']
 
             else:
-                logger.info(f"{'-'*20} Error: Shop name is {shop['name']}, Total items is {API_lines}, Total crawled items is {count_lines} {'-'*20}")
                 error_check = True
+                df.loc[len(df)] = ['Error', shop['name'], API_lines, count_lines, f'{count_lines*100/int(API_lines)}%']
 
     # final check. Throw an error if exists.
     if error_check:
         raise AirflowException(f"{'-'*20} Recheck your download tasks, there are some files that didn't match in quantity. {'-'*20}")
     else:
+        logger.info(f'\n {df}')
         logger.info(f'{"-"*20} Final check: The data was crawled successfully {"-"*20}')
+
+        df.to_csv('/home/cuongton/airflow/project_code/crawl_shopee_data/result.csv', index=False, mode='w')
 
 with DAG(
     "daily_sale_dashboard",
     schedule_interval='0 9 * * *',
     catchup=False,
-    start_date=time_setting.start_time
+    start_date=time_setting.start_time,
+    default_args=default_args
 ) as dag:
     
     # create an empty tasks. Start and End.
@@ -148,10 +165,18 @@ with DAG(
         packages='org.apache.hadoop:hadoop-aws:3.3.1,org.apache.hadoop:hadoop-common:3.3.1,org.mongodb.spark:mongo-spark-connector_2.12:3.0.2'
     )
 
+    result_notification = EmailOperator(
+        task_id = 'result_notification',
+        to=generall_setting.gmail,
+        subject=f"Success - Result - {datetime.today()}",
+        html_content='<p>Check the result at the attached file</p>',
+        files=['/home/cuongton/airflow/project_code/crawl_shopee_data/result.csv']
+    )
+
     # ETL. To transfer and load data from datawarehous to data mart.
     daily_sale_data_mart = ETL_daily_sale()
 
     # Work flow
-    start >> check_log_in >> download_raw_data >> check_quantity >> merge_and_put_S3 >> is_the_first_time >> [initial_load, incremental_load] >> daily_sale_data_mart >> end
+    start >> check_log_in >> download_raw_data >> check_quantity >> merge_and_put_S3 >> is_the_first_time >> [initial_load, incremental_load] >> daily_sale_data_mart >> result_notification >> end
     check_quantity >> replica_task >> end
 

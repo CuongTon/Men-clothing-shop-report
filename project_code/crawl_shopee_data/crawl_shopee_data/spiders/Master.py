@@ -167,6 +167,14 @@ class MasterSpider(scrapy.Spider):
         # print(self.total_items)
         self.crawler.stats.set_value('total_items', self.total_items)
 
+class ItemFilter(logging.Filter):
+    def filter(self, record):
+        # Suppress logs that contain item data
+        return 'Scraped from <200 https://github.com>' not in record.getMessage() and "Enabled" not in record.getMessage()
+
+# Apply the custom filter to the logger
+
+
 #TBU
 def main(**kwargs):
 
@@ -177,13 +185,21 @@ def main(**kwargs):
             'overwrite': True
             }                
         },
-        'LOG_LEVEL': 'CRITICAL'
+        # 'LOG_LEVEL': 'CRITICAL'
     }
+# 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
+    loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+    for logger in loggers:
+        logger.setLevel(logging.CRITICAL)
+
+    logging.getLogger('scrapy.core.scraper').addFilter(ItemFilter())
+    logging.getLogger('scrapy.middleware').addFilter(ItemFilter())
 
     # process = CrawlerProcess(settings=settings)
     # process.crawl(MasterSpider, **kwargs)
     # process.start()
 
+    # Don't touch -------------------------------------------------------
     process = CrawlerProcess(settings=settings)
     crawler = process.create_crawler(MasterSpider)
     process.crawl(crawler, **kwargs)

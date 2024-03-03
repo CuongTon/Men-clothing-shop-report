@@ -14,7 +14,9 @@ def combine_json_file(list_of_json_file):
     merged_data = []
     for file in list_of_json_file:
         with open(f'/home/cuongton/airflow/project_code/crawl_shopee_data/{generall_setting.folder_name_staging_layer}/{current_date.year}/{current_date.month}/{current_date.day}/{file["name"]}.json', 'r', encoding='utf-8') as json_file:
-            merged_data = merged_data + (json.loads(json_file.read()))
+            temp_data = json.loads(json_file.read())
+            if temp_data:
+                merged_data = merged_data + temp_data
     return merged_data
 
 if __name__ == '__main__':

@@ -1,6 +1,8 @@
 from datetime import datetime
+import json
 
 class time_setting():
+   #default: datetime(2023, 12, 17, 9, 0)
    start_time = datetime(2023, 12, 17, 9, 0)
 
 class shop_setting():   
@@ -128,14 +130,20 @@ class shop_setting():
 
 class generall_setting():
    # Default: ShopeeVN_airflow
-   Mongo_Database = 'ShopeeVN_airflow_test' #TBU
+   Mongo_Database = 'ShopeeVN_airflow'
    Mongo_Collection = 'MenClothingShop_airflow' 
 
+   # with open('/home/cuongton/airflow/delay_time.json', 'r') as file:
+   #    text = file.read()
+   #    dct = json.loads(text)
+
    # Default: 0
+   # Manual run: dct['delay_time_for_rerun_S3']
    # Affection: adjust time for Merge_and_Put_s3, initial and incremental ETL. 
-   delay_time_for_rerun_S3 = 0 
+   delay_time_for_rerun_S3 = 0
 
    # Default: 1
+   # Manual run: dct['delay_time_for_first_day_run_ETL']
    # Affection: adjust time for daily_sale_star_schema
    delay_time_for_first_day_run_ETL = 1
 
@@ -147,4 +155,7 @@ class generall_setting():
    # Folder_name_staging_layer: 
    # Affection: group_dags - download tasks, Merge_and_Put_S3, Replica_source
    # Default: RawData
-   folder_name_staging_layer = "RawData_1" #TBU
+   folder_name_staging_layer = "RawData"
+
+   # gmail receive notification
+   gmail = 'longquecuidx11@gmail.com'
