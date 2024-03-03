@@ -156,3 +156,6 @@ class generall_setting():
    # Affection: group_dags - download tasks, Merge_and_Put_S3, Replica_source
    # Default: RawData
    folder_name_staging_layer = "RawData"
+
+   # gmail receive notification
+   gmail = 'longquecuidx11@gmail.com'

@@ -593,3 +593,5 @@ Old*
 day_setting.py
 delay_time.json
 test_delay_time.py
+test*
+result*
